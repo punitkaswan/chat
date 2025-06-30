@@ -1,0 +1,261 @@
+<!-- Due to length limits, I'll provide the full code in 2 parts. Start with Part 1 below: -->
+
+<!-- Part 1: HTML + CSS layout -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>InstaChat</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #fafafa;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .app {
+      display: flex;
+      width: 95%;
+      max-width: 1100px;
+      height: 90vh;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    }
+    .sidebar {
+      width: 280px;
+      background: white;
+      border-right: 1px solid #ddd;
+      display: flex;
+      flex-direction: column;
+    }
+    .sidebar-header {
+      padding: 20px;
+      font-weight: bold;
+      font-size: 20px;
+      color: #333;
+      border-bottom: 1px solid #eee;
+    }
+    .chat-list {
+      flex: 1;
+      overflow-y: auto;
+    }
+    .chat-list div {
+      padding: 15px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      cursor: pointer;
+    }
+    .chat-list div:hover {
+      background: #f7f7f7;
+    }
+    .main {
+      flex: 1;
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+    }
+    .chat-header {
+      padding: 15px 20px;
+      font-weight: bold;
+      border-bottom: 1px solid #eee;
+    }
+    .chat-box {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .message {
+      max-width: 60%;
+      padding: 10px 15px;
+      border-radius: 20px;
+      word-wrap: break-word;
+      position: relative;
+    }
+    .you { background: #dcf8c6; align-self: flex-end; }
+    .other { background: #f1f0f0; align-self: flex-start; }
+    .timestamp { font-size: 10px; color: gray; margin-top: 3px; }
+    .chat-input {
+      display: flex;
+      padding: 10px 15px;
+      border-top: 1px solid #eee;
+      gap: 10px;
+    }
+    .chat-input input[type="text"] {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 20px;
+      outline: none;
+    }
+    .chat-input input[type="file"] {
+      display: none;
+    }
+    .chat-input button {
+      border: none;
+      background: #3897f0;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+    #loginArea {
+      position: absolute;
+      inset: 0;
+      background: white;
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      gap: 10px;
+    }
+    #loginArea input {
+      padding: 10px;
+      width: 250px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    #loginArea button {
+      padding: 10px;
+      width: 250px;
+      background: #3897f0;
+      border: none;
+      color: white;
+      border-radius: 5px;
+    }
+    .media { max-width: 200px; border-radius: 12px; margin-top: 5px; }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <div class="sidebar-header">InstaChat</div>
+    <div class="chat-list" id="chatList">
+      <div onclick="selectRoom('general')"># general</div>
+      <div onclick="selectRoom('funny')"># funny</div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="chat-header" id="roomLabel"># general</div>
+    <div class="chat-box" id="chatBox"></div>
+    <div class="chat-input">
+      <input type="text" id="messageInput" placeholder="Type a message...">
+      <label for="fileInput">📎</label>
+      <input type="file" id="fileInput" accept="image/*">
+      <button onclick="startRecording()">🎤</button>
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+</div>
+
+<div id="loginArea">
+  <h2>Login to InstaChat</h2>
+  <input type="email" id="email" placeholder="Email" />
+  <input type="password" id="password" placeholder="Password" />
+  <button onclick="login()">Login</button>
+  <button onclick="register()">Register</button>
+</div>
+<!-- Part 2: Firebase config + JS logic -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDrQ4xQVyErcl5Jv76vF7qoqSX21i0LU-g",
+  authDomain: "chatting-app-77.firebaseapp.com",
+  databaseURL: "https://chatting-app-77-default-rtdb.firebaseio.com",
+  projectId: "chatting-app-77",
+  storageBucket: "chatting-app-77.appspot.com",
+  messagingSenderId: "452760656104",
+  appId: "1:452760656104:web:8e8a75ebe791cbbabd115d"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const storage = firebase.storage();
+const auth = firebase.auth();
+
+let room = "general";
+let userEmail = "";
+
+function selectRoom(newRoom) {
+  room = newRoom;
+  document.getElementById("roomLabel").innerText = "#" + room;
+  document.getElementById("chatBox").innerHTML = "";
+  listenMessages();
+}
+
+function register() {
+  const email = document.getElementById("email").value;
+  const pass = document.getElementById("password").value;
+  auth.createUserWithEmailAndPassword(email, pass).then(() => login());
+}
+
+function login() {
+  const email = document.getElementById("email").value;
+  const pass = document.getElementById("password").value;
+  auth.signInWithEmailAndPassword(email, pass).then(() => {
+    userEmail = email;
+    document.getElementById("loginArea").style.display = "none";
+    listenMessages();
+  });
+}
+
+function sendMessage() {
+  const text = document.getElementById("messageInput").value.trim();
+  const file = document.getElementById("fileInput").files[0];
+  const now = new Date().toLocaleTimeString();
+  if (text) {
+    db.ref("rooms/" + room).push({ type: "text", user: userEmail, text, time: now });
+    document.getElementById("messageInput").value = "";
+  }
+  if (file) {
+    const ref = storage.ref("images/" + Date.now() + "_" + file.name);
+    ref.put(file).then(snap => snap.ref.getDownloadURL().then(url => {
+      db.ref("rooms/" + room).push({ type: "image", user: userEmail, url, time: now });
+    }));
+    document.getElementById("fileInput").value = "";
+  }
+}
+
+function startRecording() {
+  navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+    const recorder = new MediaRecorder(stream);
+    let chunks = [];
+    recorder.ondataavailable = e => chunks.push(e.data);
+    recorder.onstop = () => {
+      const audioBlob = new Blob(chunks, { type: "audio/webm" });
+      const ref = storage.ref("voice/" + Date.now() + ".webm");
+      ref.put(audioBlob).then(snap => snap.ref.getDownloadURL().then(url => {
+        db.ref("rooms/" + room).push({ type: "audio", user: userEmail, url, time: new Date().toLocaleTimeString() });
+      }));
+    };
+    recorder.start();
+    setTimeout(() => recorder.stop(), 5000);
+  });
+}
+
+function listenMessages() {
+  db.ref("rooms/" + room).off();
+  db.ref("rooms/" + room).on("child_added", snap => {
+    const data = snap.val();
+    const div = document.createElement("div");
+    div.className = "message " + (data.user === userEmail ? "you" : "other");
+    if (data.type === "text") div.innerHTML = data.text + `<div class="timestamp">${data.time}</div>`;
+    else if (data.type === "image") div.innerHTML = `<img src="${data.url}" class="media"><div class="timestamp">${data.time}</div>`;
+    else if (data.type === "audio") div.innerHTML = `<audio controls src="${data.url}"></audio><div class="timestamp">${data.time}</div>`;
+    document.getElementById("chatBox").appendChild(div);
+    document.getElementById("chatBox").scrollTop = chatBox.scrollHeight;
+  });
+}
+</script>
+</body>
+</html>
