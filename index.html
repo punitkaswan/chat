@@ -1,142 +1,38 @@
-<!-- Due to length limits, I'll provide the full code in 2 parts. Start with Part 1 below: -->
-
-<!-- Part 1: HTML + CSS layout -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>InstaChat</title>
+  <title>InstaChat ✅✅</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: #fafafa;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-    .app {
-      display: flex;
-      width: 95%;
-      max-width: 1100px;
-      height: 90vh;
-      border-radius: 16px;
-      overflow: hidden;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    }
-    .sidebar {
-      width: 280px;
-      background: white;
-      border-right: 1px solid #ddd;
-      display: flex;
-      flex-direction: column;
-    }
-    .sidebar-header {
-      padding: 20px;
-      font-weight: bold;
-      font-size: 20px;
-      color: #333;
-      border-bottom: 1px solid #eee;
-    }
-    .chat-list {
-      flex: 1;
-      overflow-y: auto;
-    }
-    .chat-list div {
-      padding: 15px 20px;
-      border-bottom: 1px solid #f0f0f0;
-      cursor: pointer;
-    }
-    .chat-list div:hover {
-      background: #f7f7f7;
-    }
-    .main {
-      flex: 1;
-      background: #fff;
-      display: flex;
-      flex-direction: column;
-    }
-    .chat-header {
-      padding: 15px 20px;
-      font-weight: bold;
-      border-bottom: 1px solid #eee;
-    }
-    .chat-box {
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .message {
-      max-width: 60%;
-      padding: 10px 15px;
-      border-radius: 20px;
-      word-wrap: break-word;
-      position: relative;
-    }
+    body { font-family: 'Segoe UI', sans-serif; background: #fafafa; display: flex; justify-content: center; align-items: center; height: 100vh; }
+    .app { display: flex; width: 95%; max-width: 1100px; height: 90vh; border-radius: 16px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    .sidebar { width: 280px; background: white; border-right: 1px solid #ddd; display: flex; flex-direction: column; }
+    .sidebar-header { padding: 20px; font-weight: bold; font-size: 20px; color: #333; border-bottom: 1px solid #eee; }
+    .chat-list { flex: 1; overflow-y: auto; }
+    .chat-list div { padding: 15px 20px; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
+    .chat-list div:hover { background: #f7f7f7; }
+    .main { flex: 1; background: #fff; display: flex; flex-direction: column; }
+    .chat-header { padding: 15px 20px; font-weight: bold; border-bottom: 1px solid #eee; }
+    .chat-box { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+    .message { max-width: 60%; padding: 10px 15px; border-radius: 20px; word-wrap: break-word; position: relative; }
     .you { background: #dcf8c6; align-self: flex-end; }
     .other { background: #f1f0f0; align-self: flex-start; }
-    .timestamp { font-size: 10px; color: gray; margin-top: 3px; }
-    .chat-input {
-      display: flex;
-      padding: 10px 15px;
-      border-top: 1px solid #eee;
-      gap: 10px;
-    }
-    .chat-input input[type="text"] {
-      flex: 1;
-      padding: 10px;
-      border: 1px solid #ddd;
-      border-radius: 20px;
-      outline: none;
-    }
-    .chat-input input[type="file"] {
-      display: none;
-    }
-    .chat-input button {
-      border: none;
-      background: #3897f0;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 20px;
-      cursor: pointer;
-    }
-    #loginArea {
-      position: absolute;
-      inset: 0;
-      background: white;
-      z-index: 10;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      gap: 10px;
-    }
-    #loginArea input {
-      padding: 10px;
-      width: 250px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-    }
-    #loginArea button {
-      padding: 10px;
-      width: 250px;
-      background: #3897f0;
-      border: none;
-      color: white;
-      border-radius: 5px;
-    }
+    .timestamp { font-size: 10px; color: gray; margin-top: 3px; display: flex; justify-content: space-between; }
+    .chat-input { display: flex; padding: 10px 15px; border-top: 1px solid #eee; gap: 10px; }
+    .chat-input input[type="text"] { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 20px; outline: none; }
+    .chat-input input[type="file"] { display: none; }
+    .chat-input button { border: none; background: #3897f0; color: white; padding: 10px 20px; border-radius: 20px; cursor: pointer; }
+    #loginArea { position: absolute; inset: 0; background: white; z-index: 10; display: flex; justify-content: center; align-items: center; flex-direction: column; gap: 10px; }
+    #loginArea input { padding: 10px; width: 250px; border-radius: 5px; border: 1px solid #ccc; }
+    #loginArea button { padding: 10px; width: 250px; background: #3897f0; border: none; color: white; border-radius: 5px; }
     .media { max-width: 200px; border-radius: 12px; margin-top: 5px; }
   </style>
 </head>
 <body>
 <div class="app">
   <div class="sidebar">
-    <div class="sidebar-header">InstaChat</div>
+    <div class="sidebar-header">InstaChat ✅✅</div>
     <div class="chat-list" id="chatList">
       <div onclick="selectRoom('general')"># general</div>
       <div onclick="selectRoom('funny')"># funny</div>
@@ -162,7 +58,7 @@
   <button onclick="login()">Login</button>
   <button onclick="register()">Register</button>
 </div>
-<!-- Part 2: Firebase config + JS logic -->
+
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
@@ -214,13 +110,13 @@ function sendMessage() {
   const file = document.getElementById("fileInput").files[0];
   const now = new Date().toLocaleTimeString();
   if (text) {
-    db.ref("rooms/" + room).push({ type: "text", user: userEmail, text, time: now });
+    db.ref("rooms/" + room).push({ type: "text", user: userEmail, text, time: now, seenBy: [userEmail] });
     document.getElementById("messageInput").value = "";
   }
   if (file) {
     const ref = storage.ref("images/" + Date.now() + "_" + file.name);
     ref.put(file).then(snap => snap.ref.getDownloadURL().then(url => {
-      db.ref("rooms/" + room).push({ type: "image", user: userEmail, url, time: now });
+      db.ref("rooms/" + room).push({ type: "image", user: userEmail, url, time: now, seenBy: [userEmail] });
     }));
     document.getElementById("fileInput").value = "";
   }
@@ -235,7 +131,7 @@ function startRecording() {
       const audioBlob = new Blob(chunks, { type: "audio/webm" });
       const ref = storage.ref("voice/" + Date.now() + ".webm");
       ref.put(audioBlob).then(snap => snap.ref.getDownloadURL().then(url => {
-        db.ref("rooms/" + room).push({ type: "audio", user: userEmail, url, time: new Date().toLocaleTimeString() });
+        db.ref("rooms/" + room).push({ type: "audio", user: userEmail, url, time: new Date().toLocaleTimeString(), seenBy: [userEmail] });
       }));
     };
     recorder.start();
@@ -247,11 +143,32 @@ function listenMessages() {
   db.ref("rooms/" + room).off();
   db.ref("rooms/" + room).on("child_added", snap => {
     const data = snap.val();
+    const key = snap.key;
+
+    // Update seenBy
+    if (!data.seenBy || !data.seenBy.includes(userEmail)) {
+      db.ref("rooms/" + room + "/" + key + "/seenBy").once("value").then(s => {
+        const current = s.val() || [];
+        if (!current.includes(userEmail)) {
+          current.push(userEmail);
+          db.ref("rooms/" + room + "/" + key + "/seenBy").set(current);
+        }
+      });
+    }
+
     const div = document.createElement("div");
     div.className = "message " + (data.user === userEmail ? "you" : "other");
-    if (data.type === "text") div.innerHTML = data.text + `<div class="timestamp">${data.time}</div>`;
-    else if (data.type === "image") div.innerHTML = `<img src="${data.url}" class="media"><div class="timestamp">${data.time}</div>`;
-    else if (data.type === "audio") div.innerHTML = `<audio controls src="${data.url}"></audio><div class="timestamp">${data.time}</div>`;
+
+    let tick = "";
+    if (data.user === userEmail) {
+      const viewers = data.seenBy || [];
+      tick = viewers.length > 1 ? "✅✅" : "✅";
+    }
+
+    if (data.type === "text") div.innerHTML = `${data.text}<div class="timestamp">${data.time} ${tick}</div>`;
+    else if (data.type === "image") div.innerHTML = `<img src="${data.url}" class="media"><div class="timestamp">${data.time} ${tick}</div>`;
+    else if (data.type === "audio") div.innerHTML = `<audio controls src="${data.url}"></audio><div class="timestamp">${data.time} ${tick}</div>`;
+
     document.getElementById("chatBox").appendChild(div);
     document.getElementById("chatBox").scrollTop = chatBox.scrollHeight;
   });
