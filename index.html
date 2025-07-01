@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>WhatsApp Clone</title>
+  <title>ChatApp - WhatsApp Clone</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     * { box-sizing: border-box; }
@@ -22,7 +22,6 @@
       background: #fff;
       box-shadow: 0 0 10px rgba(0,0,0,0.2);
     }
-    /* Sidebar */
     .sidebar {
       width: 30%;
       background: #fff;
@@ -62,8 +61,6 @@
     .chat-item:hover {
       background: #f7f7f7;
     }
-
-    /* Main Chat */
     .chat-area {
       flex: 1;
       display: flex;
@@ -91,14 +88,8 @@
       position: relative;
       animation: slideIn 0.3s ease;
     }
-    .me {
-      align-self: flex-end;
-      background: #dcf8c6;
-    }
-    .other {
-      align-self: flex-start;
-      background: white;
-    }
+    .me { align-self: flex-end; background: #dcf8c6; }
+    .other { align-self: flex-start; background: white; }
     .timestamp {
       font-size: 10px;
       text-align: right;
@@ -130,8 +121,6 @@
       margin-left: 10px;
       cursor: pointer;
     }
-
-    /* Login Overlay */
     #loginScreen {
       position: absolute;
       inset: 0;
@@ -158,8 +147,6 @@
       border-radius: 5px;
       margin-top: 5px;
     }
-
-    /* New Chat Modal */
     #newChatModal {
       display: none;
       position: fixed;
@@ -188,7 +175,6 @@
       border-radius: 5px;
       cursor: pointer;
     }
-
     #overlay {
       display: none;
       position: fixed;
@@ -205,16 +191,13 @@
     <input type="password" id="password" placeholder="Password" />
     <button onclick="login()">Login</button>
   </div>
-
   <div class="app" style="display:none;" id="mainApp">
     <div class="sidebar">
       <div class="sidebar-header">
         My Chats
         <button onclick="openNewChat()">+ New</button>
       </div>
-      <div class="chat-list" id="chatList">
-        <!-- Contacts will be loaded here -->
-      </div>
+      <div class="chat-list" id="chatList"></div>
     </div>
     <div class="chat-area">
       <div class="chat-header" id="chatHeader">Select a chat</div>
@@ -225,153 +208,147 @@
       </div>
     </div>
   </div>
-
-  <!-- New Chat Modal -->
   <div id="overlay"></div>
   <div id="newChatModal">
     <h3>Start New Chat</h3>
-    <input type="text" id="newChatUser" placeholder="Enter recipient username" />
+    <input type="email" id="newChatUser" placeholder="Enter recipient's email address" />
     <button onclick="startNewChat()">Start</button>
   </div>
-<!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
-<script>
-  // ✅ Replace with your Firebase project config
-  const firebaseConfig = {
-    apiKey: "AIzaSyDrQ4xQVyErcl5Jv76vF7qoqSX21i0LU-g",
-    authDomain: "chatting-app-77.firebaseapp.com",
-    databaseURL: "https://chatting-app-77-default-rtdb.firebaseio.com",
-    projectId: "chatting-app-77",
-    storageBucket: "chatting-app-77.appspot.com",
-    messagingSenderId: "452760656104",
-    appId: "1:452760656104:web:8e8a75ebe791cbbabd115d"
-  };
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.database();
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyDrQ4xQVyErcl5Jv76vF7qoqSX21i0LU-g",
+      authDomain: "chatting-app-77.firebaseapp.com",
+      databaseURL: "https://chatting-app-77-default-rtdb.firebaseio.com",
+      projectId: "chatting-app-77",
+      storageBucket: "chatting-app-77.appspot.com",
+      messagingSenderId: "452760656104",
+      appId: "1:452760656104:web:8e8a75ebe791cbbabd115d"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
 
-  let currentUser = null;
-  let activeChatUser = null;
+    let currentUser = null;
+    let activeChatUser = null;
 
-  // 🔐 Login
-  function login() {
-    const email = document.getElementById("email").value.trim();
-    const pass = document.getElementById("password").value.trim();
-    if (!email || !pass) return alert("Enter email & password");
+    function login() {
+      const email = document.getElementById("email").value.trim();
+      const pass = document.getElementById("password").value.trim();
+      if (!email || !pass) return alert("Enter email & password");
 
-    auth.signInWithEmailAndPassword(email, pass)
-      .then(res => {
-        currentUser = res.user;
-        localStorage.setItem("chatUser", JSON.stringify({ email, loginAt: Date.now() }));
-        document.getElementById("loginScreen").style.display = "none";
-        document.getElementById("mainApp").style.display = "flex";
-        loadChatList();
-      })
-      .catch(err => alert("Login failed: " + err.message));
-  }
-
-  // ⏳ Auto-login for 24 hours
-  function checkLogin() {
-    const saved = JSON.parse(localStorage.getItem("chatUser"));
-    if (saved && Date.now() - saved.loginAt < 86400000) {
-      auth.signInWithEmailAndPassword(saved.email, "dummy") // force refresh
-        .then(() => {
-          currentUser = auth.currentUser;
+      auth.signInWithEmailAndPassword(email, pass)
+        .then(res => {
+          currentUser = res.user;
+          localStorage.setItem("chatUser", JSON.stringify({ email, loginAt: Date.now() }));
           document.getElementById("loginScreen").style.display = "none";
           document.getElementById("mainApp").style.display = "flex";
           loadChatList();
         })
-        .catch(() => {
-          localStorage.removeItem("chatUser");
-        });
+        .catch(err => alert("Login failed: " + err.message));
     }
-  }
 
-  window.onload = checkLogin;
+    function checkLogin() {
+      const saved = JSON.parse(localStorage.getItem("chatUser"));
+      if (saved && Date.now() - saved.loginAt < 86400000) {
+        auth.signInWithEmailAndPassword(saved.email, "dummy")
+          .then(() => {
+            currentUser = auth.currentUser;
+            document.getElementById("loginScreen").style.display = "none";
+            document.getElementById("mainApp").style.display = "flex";
+            loadChatList();
+          })
+          .catch(() => {
+            localStorage.removeItem("chatUser");
+          });
+      }
+    }
 
-  // 🆕 Start new chat
-  function openNewChat() {
-    document.getElementById("newChatModal").style.display = "block";
-    document.getElementById("overlay").style.display = "block";
-  }
+    window.onload = checkLogin;
 
-  function startNewChat() {
-    const newUser = document.getElementById("newChatUser").value.trim();
-    if (!newUser || newUser === currentUser.email) return alert("Invalid username");
-    const chatID = getChatId(currentUser.email, newUser);
-    db.ref(`userChats/${currentUser.email.replace(/\./g, "_")}/${newUser.replace(/\./g, "_")}`).set(true);
-    db.ref(`userChats/${newUser.replace(/\./g, "_")}/${currentUser.email.replace(/\./g, "_")}`).set(true);
-    closeNewChatModal();
-    loadChatList();
-    openChat(newUser);
-  }
+    function openNewChat() {
+      document.getElementById("newChatModal").style.display = "block";
+      document.getElementById("overlay").style.display = "block";
+    }
 
-  function closeNewChatModal() {
-    document.getElementById("newChatModal").style.display = "none";
-    document.getElementById("overlay").style.display = "none";
-    document.getElementById("newChatUser").value = "";
-  }
+    function startNewChat() {
+      const newUser = document.getElementById("newChatUser").value.trim();
+      if (!newUser || newUser === currentUser.email) return alert("Invalid email");
+      const chatID = getChatId(currentUser.email, newUser);
+      db.ref(`userChats/${currentUser.email.replace(/\./g, "_")}/${newUser.replace(/\./g, "_")}`).set(true);
+      db.ref(`userChats/${newUser.replace(/\./g, "_")}/${currentUser.email.replace(/\./g, "_")}`).set(true);
+      closeNewChatModal();
+      loadChatList();
+      openChat(newUser);
+    }
 
-  function getChatId(a, b) {
-    return [a, b].sort().join("_").replace(/\./g, "_");
-  }
-</script>
-  // 📩 Send a message
-  function sendMessage() {
-    const msg = document.getElementById("messageInput").value.trim();
-    if (!msg || !activeChatUser) return;
+    function closeNewChatModal() {
+      document.getElementById("newChatModal").style.display = "none";
+      document.getElementById("overlay").style.display = "none";
+      document.getElementById("newChatUser").value = "";
+    }
 
-    const chatId = getChatId(currentUser.email, activeChatUser);
-    const now = new Date().toLocaleTimeString();
-    const message = {
-      from: currentUser.email,
-      text: msg,
-      time: now
-    };
+    function getChatId(a, b) {
+      return [a, b].sort().join("_").replace(/\./g, "_");
+    }
 
-    db.ref("chats/" + chatId).push(message);
-    document.getElementById("messageInput").value = "";
-  }
+    function sendMessage() {
+      const msg = document.getElementById("messageInput").value.trim();
+      if (!msg || !activeChatUser) return;
 
-  // 📥 Load messages in real-time
-  function openChat(user) {
-    activeChatUser = user;
-    document.getElementById("chatHeader").innerText = `Chat with ${user}`;
-    document.getElementById("chatBox").innerHTML = "";
+      const chatId = getChatId(currentUser.email, activeChatUser);
+      const now = new Date().toLocaleTimeString();
+      const message = {
+        from: currentUser.email,
+        text: msg,
+        time: now
+      };
 
-    const chatId = getChatId(currentUser.email, user);
-    db.ref("chats/" + chatId).off();
-    db.ref("chats/" + chatId).on("child_added", snap => {
-      const data = snap.val();
-      const box = document.getElementById("chatBox");
+      db.ref("chats/" + chatId).push(message);
+      document.getElementById("messageInput").value = "";
+    }
 
-      const div = document.createElement("div");
-      div.className = "message " + (data.from === currentUser.email ? "me" : "other");
-      div.innerHTML = `${data.text}<div class="timestamp">${data.time}</div>`;
-      box.appendChild(div);
-      box.scrollTop = box.scrollHeight;
-    });
-  }
+    function openChat(user) {
+      activeChatUser = user;
+      document.getElementById("chatHeader").innerText = `Chat with ${user}`;
+      document.getElementById("chatBox").innerHTML = "";
 
-  // 📋 Load user's chat list
-  function loadChatList() {
-    const list = document.getElementById("chatList");
-    list.innerHTML = "";
+      const chatId = getChatId(currentUser.email, user);
+      db.ref("chats/" + chatId).off();
+      db.ref("chats/" + chatId).on("child_added", snap => {
+        const data = snap.val();
+        const box = document.getElementById("chatBox");
 
-    const userRef = `userChats/${currentUser.email.replace(/\./g, "_")}`;
-    db.ref(userRef).once("value", snap => {
-      const users = snap.val();
-      if (!users) return;
-
-      Object.keys(users).forEach(contactId => {
         const div = document.createElement("div");
-        div.className = "chat-item";
-        div.innerText = contactId.replace(/_/g, ".");
-        div.onclick = () => openChat(div.innerText);
-        list.appendChild(div);
+        div.className = "message " + (data.from === currentUser.email ? "me" : "other");
+        div.innerHTML = `${data.text}<div class="timestamp">${data.time}</div>`;
+        box.appendChild(div);
+        box.scrollTop = box.scrollHeight;
       });
-    });
-  }
+    }
+
+    function loadChatList() {
+      const list = document.getElementById("chatList");
+      list.innerHTML = "";
+
+      const userRef = `userChats/${currentUser.email.replace(/\./g, "_")}`;
+      db.ref(userRef).once("value", snap => {
+        const users = snap.val();
+        if (!users) return;
+
+        Object.keys(users).forEach(contactId => {
+          const div = document.createElement("div");
+          div.className = "chat-item";
+          div.innerText = contactId.replace(/_/g, ".");
+          div.onclick = () => openChat(div.innerText);
+          list.appendChild(div);
+        });
+      });
+    }
+  </script>
+</body>
+</html>
