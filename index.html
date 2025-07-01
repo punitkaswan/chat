@@ -1,114 +1,106 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Telegraph</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Telegraph Lite</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f9f9f9;
-      padding: 30px;
-      max-width: 800px;
-      margin: auto;
+      font-family: 'Segoe UI', sans-serif;
+      background: #f7f9fc;
+      padding: 2rem;
+      margin: 0;
+      color: #333;
     }
     h1 {
       text-align: center;
-      font-weight: 300;
+      margin-bottom: 2rem;
+      color: #2c3e50;
+    }
+    .editor {
+      max-width: 700px;
+      margin: 0 auto;
+      background: white;
+      padding: 2rem;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+      border-radius: 12px;
     }
     input, textarea, button {
       width: 100%;
+      margin: 10px 0;
       padding: 12px;
-      margin: 8px 0;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 16px;
+      font-size: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
     }
     button {
-      background-color: #0088cc;
+      background: #2ecc71;
       color: white;
-      cursor: pointer;
       border: none;
+      cursor: pointer;
+      transition: background 0.3s;
     }
     button:hover {
-      background-color: #0077b3;
+      background: #27ae60;
     }
-    #output {
-      margin-top: 20px;
-      padding: 12px;
-      background: #e6ffe6;
-      border: 1px solid #b3ffb3;
-      display: none;
-    }
-    #output a {
-      color: #006600;
+    .footer {
+      margin-top: 3rem;
+      text-align: center;
+      font-size: 0.9rem;
+      color: #888;
     }
   </style>
 </head>
 <body>
+  <h1>📝 Telegraph Publisher</h1>
+  <div class="editor">
+    <input type="text" id="author" placeholder="Your Name" />
+    <input type="text" id="title" placeholder="Post Title" />
+    <textarea id="content" placeholder="Write your content here in HTML..."></textarea>
+    <button onclick="publish()">📤 Publish</button>
+  </div>
 
-  <h1>📝 Mini Telegraph</h1>
-  <input id="short_name" placeholder="Account Name (e.g. MyPage)" />
-  <input id="author_name" placeholder="Author Name (Optional)" />
-  <input id="title" placeholder="Article Title" />
-  <textarea id="content" rows="10" placeholder="Write your article content here..."></textarea>
-  <button onclick="createAndPost()">Publish</button>
-
-  <div id="output"></div>
+  <div class="footer">
+    Built with ❤️ using Telegraph API
+  </div>
 
   <script>
-    const API_BASE = "https://corsproxy.io/?https://api.telegra.ph";
+    async function publish() {
+      const author = document.getElementById("author").value.trim();
+      const title = document.getElementById("title").value.trim();
+      const content = document.getElementById("content").value.trim();
 
-    async function createAccount(short_name, author_name = '') {
-      const url = `${API_BASE}/createAccount?short_name=${encodeURIComponent(short_name)}&author_name=${encodeURIComponent(author_name)}`;
-      const res = await fetch(url);
-      const json = await res.json();
-      if (json.ok) return json.result.access_token;
-      throw new Error(json.error);
-    }
-
-    async function createPage(token, title, author_name, content) {
-      const contentArr = [{ tag: "p", children: [content] }];
-      const res = await fetch(`${API_BASE}/createPage`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          access_token: token,
-          title,
-          author_name,
-          content: contentArr,
-          return_content: true
-        })
-      });
-      const json = await res.json();
-      if (json.ok) return json.result.url;
-      throw new Error(json.error);
-    }
-
-    async function createAndPost() {
-      const short_name = document.getElementById("short_name").value;
-      const author_name = document.getElementById("author_name").value;
-      const title = document.getElementById("title").value;
-      const content = document.getElementById("content").value;
-
-      if (!short_name || !title || !content) {
-        alert("Please fill in all required fields.");
+      if (!author || !title || !content) {
+        alert("Please fill all fields.");
         return;
       }
 
       try {
-        let token = localStorage.getItem("telegraph_token");
-        if (!token) {
-          token = await createAccount(short_name, author_name);
-          localStorage.setItem("telegraph_token", token);
-        }
+        const access_token = 'f2c4cbe9f824a98fb8f16546ed4c1e559ecba11b1f3975b1b7a8383cdd'; // Public demo token
 
-        const pageUrl = await createPage(token, title, author_name, content);
-        const output = document.getElementById("output");
-        output.innerHTML = `✅ Published: <a href="${pageUrl}" target="_blank">${pageUrl}</a>`;
-        output.style.display = "block";
-      } catch (err) {
-        alert("Error: " + err.message);
+        const createPage = await fetch(`https://api.telegra.ph/createPage`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            access_token,
+            title,
+            author_name: author,
+            content: JSON.stringify([
+              { tag: "p", children: [content] }
+            ]),
+            return_content: false
+          })
+        });
+
+        const result = await createPage.json();
+
+        if (result.ok) {
+          window.open(result.result.url, "_blank");
+        } else {
+          alert("Failed to publish: " + result.error);
+        }
+      } catch (error) {
+        alert("Error: " + error.message);
       }
     }
   </script>
