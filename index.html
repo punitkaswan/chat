@@ -2,74 +2,78 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>ChatApp - WhatsApp Style</title>
+  <title>WhatsApp Clone</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: 'Segoe UI', sans-serif;
       background: #e5ddd5;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       height: 100vh;
-    }
-    .app {
-      width: 100%;
-      max-width: 900px;
-      height: 95vh;
-      background: #fff;
-      display: flex;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-      border-radius: 10px;
       overflow: hidden;
     }
-
+    .app {
+      display: flex;
+      width: 100%;
+      max-width: 1200px;
+      height: 100vh;
+      margin: auto;
+      background: #fff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    }
     /* Sidebar */
     .sidebar {
-      width: 250px;
-      background: #075E54;
-      color: white;
+      width: 30%;
+      background: #fff;
+      border-right: 1px solid #ddd;
       display: flex;
       flex-direction: column;
     }
     .sidebar-header {
-      padding: 20px;
-      font-weight: bold;
-      font-size: 20px;
       background: #128C7E;
+      color: white;
+      padding: 15px;
+      font-weight: bold;
+      font-size: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
-    .contacts {
+    .sidebar-header button {
+      background: white;
+      color: #128C7E;
+      border: none;
+      border-radius: 20px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .chat-list {
       flex: 1;
       overflow-y: auto;
-      padding: 10px;
     }
-    .contacts div {
-      padding: 12px;
-      background: rgba(255, 255, 255, 0.1);
-      margin-bottom: 8px;
-      border-radius: 6px;
+    .chat-item {
+      padding: 12px 16px;
+      border-bottom: 1px solid #eee;
       cursor: pointer;
-      transition: background 0.3s ease;
+      transition: background 0.2s ease;
     }
-    .contacts div:hover {
-      background: rgba(255, 255, 255, 0.2);
+    .chat-item:hover {
+      background: #f7f7f7;
     }
 
-    /* Chat area */
-    .chat {
+    /* Main Chat */
+    .chat-area {
       flex: 1;
       display: flex;
       flex-direction: column;
       background: #ece5dd;
     }
     .chat-header {
-      padding: 15px;
-      background: #128C7E;
+      background: #075E54;
       color: white;
+      padding: 15px;
       font-weight: bold;
     }
     .chat-box {
@@ -81,18 +85,13 @@
       gap: 10px;
     }
     .message {
-      max-width: 60%;
       padding: 10px 15px;
-      border-radius: 15px;
-      font-size: 14px;
+      border-radius: 10px;
+      max-width: 70%;
       position: relative;
-      animation: slideIn 0.3s ease-out;
+      animation: slideIn 0.3s ease;
     }
-    @keyframes slideIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    .you {
+    .me {
       align-self: flex-end;
       background: #dcf8c6;
     }
@@ -102,16 +101,18 @@
     }
     .timestamp {
       font-size: 10px;
-      color: gray;
       text-align: right;
-      margin-top: 3px;
+      color: gray;
+      margin-top: 4px;
     }
-
+    @keyframes slideIn {
+      from { transform: translateY(10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
     .chat-input {
       display: flex;
-      gap: 10px;
       padding: 10px;
-      border-top: 1px solid #ccc;
+      border-top: 1px solid #ddd;
       background: #f0f0f0;
     }
     .chat-input input {
@@ -122,14 +123,15 @@
     }
     .chat-input button {
       padding: 10px 20px;
-      border: none;
       background: #128C7E;
       color: white;
+      border: none;
       border-radius: 20px;
+      margin-left: 10px;
       cursor: pointer;
     }
 
-    /* Login screen */
+    /* Login Overlay */
     #loginScreen {
       position: absolute;
       inset: 0;
@@ -154,39 +156,90 @@
       color: white;
       border: none;
       border-radius: 5px;
+      margin-top: 5px;
+    }
+
+    /* New Chat Modal */
+    #newChatModal {
+      display: none;
+      position: fixed;
+      top: 30%;
+      left: 50%;
+      transform: translate(-50%, -30%);
+      background: white;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    #newChatModal input {
+      padding: 10px;
+      width: 100%;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    #newChatModal button {
+      padding: 8px 16px;
+      background: #128C7E;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    #overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 999;
     }
   </style>
 </head>
 <body>
-  <div class="app">
+  <div id="loginScreen">
+    <h2>Login to Chat</h2>
+    <input type="email" id="email" placeholder="Email" />
+    <input type="password" id="password" placeholder="Password" />
+    <button onclick="login()">Login</button>
+  </div>
+
+  <div class="app" style="display:none;" id="mainApp">
     <div class="sidebar">
-      <div class="sidebar-header">ChatApp</div>
-      <div class="contacts">
-        <div onclick="selectUser('support')">Support</div>
-        <div onclick="selectUser('devteam')">Dev Team</div>
+      <div class="sidebar-header">
+        My Chats
+        <button onclick="openNewChat()">+ New</button>
+      </div>
+      <div class="chat-list" id="chatList">
+        <!-- Contacts will be loaded here -->
       </div>
     </div>
-    <div class="chat">
+    <div class="chat-area">
       <div class="chat-header" id="chatHeader">Select a chat</div>
       <div class="chat-box" id="chatBox"></div>
       <div class="chat-input">
-        <input type="text" id="messageInput" placeholder="Type a message..." />
+        <input type="text" id="messageInput" placeholder="Type message..." />
         <button onclick="sendMessage()">Send</button>
       </div>
     </div>
   </div>
 
-  <div id="loginScreen">
-    <h2>Login to ChatApp</h2>
-    <input type="text" id="loginName" placeholder="Enter your username" />
-    <button onclick="login()">Login</button>
+  <!-- New Chat Modal -->
+  <div id="overlay"></div>
+  <div id="newChatModal">
+    <h3>Start New Chat</h3>
+    <input type="text" id="newChatUser" placeholder="Enter recipient username" />
+    <button onclick="startNewChat()">Start</button>
   </div>
 <!-- Firebase SDKs -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-  // ✅ Your Firebase Config
+  // ✅ Replace with your Firebase project config
   const firebaseConfig = {
     apiKey: "AIzaSyDrQ4xQVyErcl5Jv76vF7qoqSX21i0LU-g",
     authDomain: "chatting-app-77.firebaseapp.com",
@@ -197,74 +250,128 @@
     appId: "1:452760656104:web:8e8a75ebe791cbbabd115d"
   };
   firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
   const db = firebase.database();
 
-  let currentUser = '';
-  let selectedChatUser = '';
+  let currentUser = null;
+  let activeChatUser = null;
 
-  // 🔐 Login with just a username, store it with expiry
+  // 🔐 Login
   function login() {
-    const name = document.getElementById("loginName").value.trim();
-    if (!name) return alert("Enter your username");
-    const now = Date.now();
-    localStorage.setItem("user", JSON.stringify({ name, time: now }));
-    currentUser = name;
-    document.getElementById("loginScreen").style.display = "none";
+    const email = document.getElementById("email").value.trim();
+    const pass = document.getElementById("password").value.trim();
+    if (!email || !pass) return alert("Enter email & password");
+
+    auth.signInWithEmailAndPassword(email, pass)
+      .then(res => {
+        currentUser = res.user;
+        localStorage.setItem("chatUser", JSON.stringify({ email, loginAt: Date.now() }));
+        document.getElementById("loginScreen").style.display = "none";
+        document.getElementById("mainApp").style.display = "flex";
+        loadChatList();
+      })
+      .catch(err => alert("Login failed: " + err.message));
   }
 
-  // 🕒 Auto logout after 24 hours
+  // ⏳ Auto-login for 24 hours
   function checkLogin() {
-    const data = JSON.parse(localStorage.getItem("user"));
-    if (data && Date.now() - data.time < 24 * 60 * 60 * 1000) {
-      currentUser = data.name;
-      document.getElementById("loginScreen").style.display = "none";
-    } else {
-      localStorage.removeItem("user");
+    const saved = JSON.parse(localStorage.getItem("chatUser"));
+    if (saved && Date.now() - saved.loginAt < 86400000) {
+      auth.signInWithEmailAndPassword(saved.email, "dummy") // force refresh
+        .then(() => {
+          currentUser = auth.currentUser;
+          document.getElementById("loginScreen").style.display = "none";
+          document.getElementById("mainApp").style.display = "flex";
+          loadChatList();
+        })
+        .catch(() => {
+          localStorage.removeItem("chatUser");
+        });
     }
   }
-  checkLogin();
 
-  // 👥 Select chat contact
-  function selectUser(user) {
-    selectedChatUser = user;
-    document.getElementById("chatHeader").innerText = `Chat with ${user}`;
-    document.getElementById("chatBox").innerHTML = "";
-    listenToMessages();
+  window.onload = checkLogin;
+
+  // 🆕 Start new chat
+  function openNewChat() {
+    document.getElementById("newChatModal").style.display = "block";
+    document.getElementById("overlay").style.display = "block";
   }
 
+  function startNewChat() {
+    const newUser = document.getElementById("newChatUser").value.trim();
+    if (!newUser || newUser === currentUser.email) return alert("Invalid username");
+    const chatID = getChatId(currentUser.email, newUser);
+    db.ref(`userChats/${currentUser.email.replace(/\./g, "_")}/${newUser.replace(/\./g, "_")}`).set(true);
+    db.ref(`userChats/${newUser.replace(/\./g, "_")}/${currentUser.email.replace(/\./g, "_")}`).set(true);
+    closeNewChatModal();
+    loadChatList();
+    openChat(newUser);
+  }
+
+  function closeNewChatModal() {
+    document.getElementById("newChatModal").style.display = "none";
+    document.getElementById("overlay").style.display = "none";
+    document.getElementById("newChatUser").value = "";
+  }
+
+  function getChatId(a, b) {
+    return [a, b].sort().join("_").replace(/\./g, "_");
+  }
+</script>
   // 📩 Send a message
   function sendMessage() {
-    const text = document.getElementById("messageInput").value.trim();
-    if (!text || !selectedChatUser) return;
+    const msg = document.getElementById("messageInput").value.trim();
+    if (!msg || !activeChatUser) return;
+
+    const chatId = getChatId(currentUser.email, activeChatUser);
     const now = new Date().toLocaleTimeString();
-    const roomId = getRoomId(currentUser, selectedChatUser);
-    db.ref("chats/" + roomId).push({
-      sender: currentUser,
-      text: text,
+    const message = {
+      from: currentUser.email,
+      text: msg,
       time: now
-    });
+    };
+
+    db.ref("chats/" + chatId).push(message);
     document.getElementById("messageInput").value = "";
   }
 
-  // 📥 Listen for messages
-  function listenToMessages() {
-    const chatBox = document.getElementById("chatBox");
-    const roomId = getRoomId(currentUser, selectedChatUser);
-    db.ref("chats/" + roomId).off();
-    db.ref("chats/" + roomId).on("child_added", snap => {
+  // 📥 Load messages in real-time
+  function openChat(user) {
+    activeChatUser = user;
+    document.getElementById("chatHeader").innerText = `Chat with ${user}`;
+    document.getElementById("chatBox").innerHTML = "";
+
+    const chatId = getChatId(currentUser.email, user);
+    db.ref("chats/" + chatId).off();
+    db.ref("chats/" + chatId).on("child_added", snap => {
       const data = snap.val();
-      const msg = document.createElement("div");
-      msg.className = "message " + (data.sender === currentUser ? "you" : "other");
-      msg.innerHTML = `${data.text}<div class="timestamp">${data.time}</div>`;
-      chatBox.appendChild(msg);
-      chatBox.scrollTop = chatBox.scrollHeight;
+      const box = document.getElementById("chatBox");
+
+      const div = document.createElement("div");
+      div.className = "message " + (data.from === currentUser.email ? "me" : "other");
+      div.innerHTML = `${data.text}<div class="timestamp">${data.time}</div>`;
+      box.appendChild(div);
+      box.scrollTop = box.scrollHeight;
     });
   }
 
-  // 🔁 Create unique 1-to-1 room name
-  function getRoomId(a, b) {
-    return [a, b].sort().join("_");
+  // 📋 Load user's chat list
+  function loadChatList() {
+    const list = document.getElementById("chatList");
+    list.innerHTML = "";
+
+    const userRef = `userChats/${currentUser.email.replace(/\./g, "_")}`;
+    db.ref(userRef).once("value", snap => {
+      const users = snap.val();
+      if (!users) return;
+
+      Object.keys(users).forEach(contactId => {
+        const div = document.createElement("div");
+        div.className = "chat-item";
+        div.innerText = contactId.replace(/_/g, ".");
+        div.onclick = () => openChat(div.innerText);
+        list.appendChild(div);
+      });
+    });
   }
-</script>
-</body>
-</html>
